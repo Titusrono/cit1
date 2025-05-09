@@ -1,12 +1,12 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreatePetitionDto {
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   title: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   description: string;
 
   @IsOptional()

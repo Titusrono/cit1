@@ -12,13 +12,10 @@ export class PetitionsService {
   ) {}
 
   async create(createPetitionDto: CreatePetitionDto, file: Express.Multer.File) {
-    // If a file is uploaded, store its filename
-    const petitionData: any = {
+    const created = new this.petitionModel({
       ...createPetitionDto,
-      supportingDocs: file ? file.filename : null,  // Store filename if file is uploaded
-    };
-
-    const created = new this.petitionModel(petitionData);
+      supportingDocs: file ? file.originalname : null, // Store filename if uploaded
+    });
     return created.save();
   }
 
