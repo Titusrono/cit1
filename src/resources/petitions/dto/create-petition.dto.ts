@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreatePetitionDto {
   @IsNotEmpty()
@@ -8,4 +8,8 @@ export class CreatePetitionDto {
   @IsNotEmpty()
   @IsString()
   description: string;
+
+  @IsOptional()
+  @IsString()
+  targetAuthority?: string;
 }

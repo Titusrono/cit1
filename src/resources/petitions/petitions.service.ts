@@ -11,8 +11,14 @@ export class PetitionsService {
     @InjectModel(Petition.name) private petitionModel: Model<PetitionDocument>,
   ) {}
 
-  create(createPetitionDto: CreatePetitionDto) {
-    const created = new this.petitionModel(createPetitionDto);
+  async create(createPetitionDto: CreatePetitionDto, file: Express.Multer.File) {
+    // If a file is uploaded, store its filename
+    const petitionData: any = {
+      ...createPetitionDto,
+      supportingDocs: file ? file.filename : null,  // Store filename if file is uploaded
+    };
+
+    const created = new this.petitionModel(petitionData);
     return created.save();
   }
 
