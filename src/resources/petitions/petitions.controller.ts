@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express'; // 👈 import this
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { PetitionsService } from './petitions.service';
 import { CreatePetitionDto } from './dto/create-petition.dto';
 import { UpdatePetitionDto } from './dto/update-petition.dto';
@@ -8,11 +8,12 @@ import { UpdatePetitionDto } from './dto/update-petition.dto';
 export class PetitionsController {
   constructor(private readonly petitionsService: PetitionsService) {}
 
+  // ✅ Handle file upload and form data together
   @Post()
-  @UseInterceptors(FileInterceptor('supportingDocs')) // 👈 this handles file upload
+  @UseInterceptors(FileInterceptor('supportingDocs'))
   create(
-    @UploadedFile() file: Express.Multer.File, // 👈 this gets the uploaded file
-    @Body() createPetitionDto: CreatePetitionDto // 👈 this gets the form fields
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createPetitionDto: CreatePetitionDto
   ) {
     return this.petitionsService.create(createPetitionDto, file);
   }
