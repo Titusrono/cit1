@@ -3,9 +3,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PetitionsModule } from './resources/petitions/petitions.module';
-import { AuthModule } from './resources/auth/auth.module';
+import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './resources/users/users.module';
-
+import { LoginModule } from './auth/login/login.module';
+import { RegisterModule } from './auth/register/register.module';
+import { ResetpassModule } from './auth/resetpass/resetpass.module';
+import { ForgotpassModule } from './auth/forgotpass/forgotpass.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
@@ -15,6 +18,10 @@ import { UsersModule } from './resources/users/users.module';
     PetitionsModule,
     AuthModule,
     UsersModule,
+    LoginModule,
+    RegisterModule,
+    ResetpassModule,
+    ForgotpassModule,
   ],
   controllers: [AppController],
   providers: [AppService],
