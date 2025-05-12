@@ -9,6 +9,7 @@ import { LoginModule } from './auth/login/login.module';
 import { RegisterModule } from './auth/register/register.module';
 import { ResetpassModule } from './auth/resetpass/resetpass.module';
 import { ForgotpassModule } from './auth/forgotpass/forgotpass.module';
+import { ReportModule } from './resources/report/report.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
@@ -22,6 +23,7 @@ import { ForgotpassModule } from './auth/forgotpass/forgotpass.module';
     RegisterModule,
     ResetpassModule,
     ForgotpassModule,
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [AppService],
