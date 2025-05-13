@@ -7,33 +7,30 @@ import { UpdateVotecreateDto } from './dto/update-votecreate.dto';
 export class VotecreateController {
   constructor(private readonly votecreateService: VotecreateService) {}
 
-  // ✅ Create new voting proposal
+  // ✅ Create a new voting proposal
   @Post()
-  create(@Body() createVotecreateDto: CreateVoteCreateDto) {
-    return this.votecreateService.create(createVotecreateDto);
+  async create(@Body() createVotecreateDto: CreateVoteCreateDto) {
+    return await this.votecreateService.create(createVotecreateDto);
   }
 
   // ✅ Get all proposals
   @Get()
-  findAll() {
-    return this.votecreateService.findAll();
+  async findAll() {
+    return await this.votecreateService.findAll();
   }
 
-  // ✅ Get a single proposal by ID
+  // ✅ Get single proposal by ID
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.votecreateService.findOne(id); // ✅ use id as string
+  async findOne(@Param('id') id: string) {
+    return await this.votecreateService.findOne(id);
   }
-
   // ✅ Update proposal by ID
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVotecreateDto: UpdateVotecreateDto) {
-    return this.votecreateService.update(id, updateVotecreateDto); // ✅ use id as string
+  async update(@Param('id') id: string, @Body() updateVotecreateDto: UpdateVotecreateDto) {
+    return await this.votecreateService.update(id, updateVotecreateDto);
   }
-
   // ✅ Delete proposal by ID
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.votecreateService.remove(id); // ✅ use id as string
-  }
-}
+  async remove(@Param('id') id: string) {
+    return await this.votecreateService.remove(id);
+  }}

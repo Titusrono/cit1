@@ -1,26 +1,44 @@
 import { Injectable } from '@nestjs/common';
 import { CreateVoteCreateDto } from './dto/create-votecreate.dto';
 import { UpdateVotecreateDto } from './dto/update-votecreate.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { VoteCreate } from './entities/votecreate.entity';
 
 @Injectable()
 export class VotecreateService {
-  create(createVotecreateDto: CreateVoteCreateDto) {
-    return 'This action adds a new votecreate';
+  constructor(
+    @InjectModel(VoteCreate.name) private votecreateModel: Model<VoteCreate>,
+  ) {}
+
+  // ✅ Create a new voting proposal
+  async create(createVotecreateDto: CreateVoteCreateDto): Promise<VoteCreate> {
+    const newProposal = new this.votecreateModel(createVotecreateDto);
+    return newProposal.save();
   }
 
-  findAll() {
-    return `This action returns all votecreate`;
+  // ✅ Get all voting proposals
+  async findAll(): Promise<VoteCreate[]> {
+    return this.votecreateModel.find().exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} votecreate`;
+  // ✅ Get a single proposal by ID
+  async findOne(id: string): Promise<VoteCreate | null> {
+    return this.votecreateModel.findById(id).exec();
   }
 
-  update(id: number, updateVotecreateDto: UpdateVotecreateDto) {
-    return `This action updates a #${id} votecreate`;
+  // ✅ Update a proposal by ID
+  async update(
+    id: string,
+    updateVotecreateDto: UpdateVotecreateDto,
+  ): Promise<VoteCreate | null> {
+    return this.votecreateModel
+      .findByIdAndUpdate(id, updateVotecreateDto, { new: true })
+      .exec();
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} votecreate`;
+  // ✅ Delete a proposal by ID
+  async remove(id: string): Promise<void> {
+    await this.votecreateModel.findByIdAndDelete(id).exec();
   }
 }
