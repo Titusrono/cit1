@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateVoteCreateDto } from './dto/create-votecreate.dto';
 import { UpdateVotecreateDto } from './dto/update-votecreate.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -13,7 +13,11 @@ export class VotecreateService {
 
   // ✅ Create a new voting proposal
   async create(createVotecreateDto: CreateVoteCreateDto): Promise<VoteCreate> {
-    const newProposal = new this.votecreateModel(createVotecreateDto);
+    const newProposal = new this.votecreateModel({
+      ...createVotecreateDto,
+      yesVotes: 0,
+      noVotes: 0,
+    });
     return newProposal.save();
   }
 
@@ -40,5 +44,23 @@ export class VotecreateService {
   // ✅ Delete a proposal by ID
   async remove(id: string): Promise<void> {
     await this.votecreateModel.findByIdAndDelete(id).exec();
+  }
+
+  // ✅ Vote on a proposal
+  async vote(id: string, vote: 'yes' | 'no'): Promise<VoteCreate> {
+    const proposal = await this.votecreateModel.findById(id);
+    if (!proposal) {
+      throw new NotFoundException('Proposal not found');
+    }
+
+    if (vote === 'yes') {
+      proposal.yesVotes += 1;
+    } else if (vote === 'no') {
+      proposal.noVotes += 1;
+    } else {
+      throw new BadRequestException('Invalid vote option');
+    }
+
+    return proposal.save();
   }
 }

@@ -6,11 +6,12 @@ import { VoteCreate, VoteCreateSchema } from './entities/votecreate.entity';
 
 @Module({
   imports: [
+    // Mongoose module setup for VoteCreate schema
     MongooseModule.forFeature([
-      { name: VoteCreate.name, schema: VoteCreateSchema }
+      { name: VoteCreate.name, schema: VoteCreateSchema },
     ]),
   ],
-  controllers: [VotecreateController],
-  providers: [VotecreateService],
+  controllers: [VotecreateController], // Registering the controller
+  providers: [VotecreateService], // Registering the service
 })
 export class VotecreateModule {}

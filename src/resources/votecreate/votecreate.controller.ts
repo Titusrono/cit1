@@ -24,13 +24,25 @@ export class VotecreateController {
   async findOne(@Param('id') id: string) {
     return await this.votecreateService.findOne(id);
   }
+
   // ✅ Update proposal by ID
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateVotecreateDto: UpdateVotecreateDto) {
     return await this.votecreateService.update(id, updateVotecreateDto);
   }
+
   // ✅ Delete proposal by ID
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return await this.votecreateService.remove(id);
-  }}
+  }
+
+  // ✅ Vote on a proposal
+  @Post(':id/vote')
+  async vote(
+    @Param('id') id: string,
+    @Body() body: { vote: 'yes' | 'no' }
+  ) {
+    return await this.votecreateService.vote(id, body.vote);
+  }
+}
