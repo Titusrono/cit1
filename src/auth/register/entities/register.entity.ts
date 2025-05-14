@@ -20,3 +20,6 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+// ✅ Export with alias to match usage in AuthModule
+export { User as Register, UserSchema as RegisterSchema };
