@@ -25,7 +25,7 @@ import { VotecreateModule } from './resources/votecreate/votecreate.module';
     ResetpassModule,
     ForgotpassModule,
     ReportModule,
-  VotecreateModule,
+    VotecreateModule,
   ],
   controllers: [AppController],
   providers: [AppService],
