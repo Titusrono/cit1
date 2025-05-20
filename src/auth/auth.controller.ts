@@ -1,9 +1,8 @@
-import { Controller, Post, Body, Param, Delete, Patch, Get } from '@nestjs/common';
+import { Controller, Post, Body, Param, Delete, Patch, Get, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';  // You may use this in your registration route
-import { CreateLoginDto } from './login/dto/create-login.dto';  // Import CreateLoginDto for login
+import { CreateRegisterDto } from './register/dto/create-register.dto';
+import { CreateLoginDto } from './login/dto/create-login.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-//import { JwtPayload } from './dto/jwt-payload.dto'; // Import JwtPayload DTO
 
 @Controller('auth')
 export class AuthController {
@@ -11,48 +10,65 @@ export class AuthController {
 
   // Register a new user
   @Post('register')
-  async create(@Body() createAuthDto: CreateAuthDto) {
+  async create(@Body() createRegisterDto: CreateRegisterDto) {
     try {
-      // Call the registration service to create the new user
-      const user = await this.authService.create(createAuthDto);
+      const user = await this.authService.create(createRegisterDto);
       return { message: 'Registration successful', user };
     } catch (error) {
       return { message: error.message || 'Registration failed' };
     }
   }
 
-  // Login route
+  // Login route — updated to ensure only registered users can log in
   @Post('login')
   async login(@Body() createLoginDto: CreateLoginDto) {
     try {
-      // Validate user credentials and return a token
       const { token, message } = await this.authService.validateUser(createLoginDto);
 
-      // Return the token in the response
+      if (!token) {
+        throw new UnauthorizedException('Invalid email or password');
+      }
+
       return { message, token };
     } catch (error) {
-      return { message: error.message || 'Login failed' };
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException(error.message || 'Login failed');
     }
   }
-
-  // Optional: Add additional routes for other CRUD operations if necessary
+  // Fetch all users (optional)
   @Get()
   findAll() {
     return this.authService.findAll();
   }
 
+  // Get one user by ID
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.authService.findOne(+id);
   }
 
+  // Update a user
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
     return this.authService.update(+id, updateAuthDto);
   }
 
+  // Delete a user
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.authService.remove(+id);
   }
+
+  // Placeholder for reset/forgot password if needed
+  // @Post('forgot-password')
+  // async forgotPassword(@Body() body: ForgotPasswordDto) {
+  //   return this.authService.forgotPassword(body.email);
+  // }
+
+  // @Post('reset-password')
+  // async resetPassword(@Body() body: ResetPasswordDto) {
+  //   return this.authService.resetPassword(body.token, body.newPassword);
+  // }
 }

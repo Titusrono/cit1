@@ -1,62 +1,116 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
-import { JwtService } from '@nestjs/jwt'; 
+import { JwtService } from '@nestjs/jwt';
 import { CreateLoginDto } from './login/dto/create-login.dto';
 import { User, UserDocument } from './register/entities/register.entity';
 import { JwtPayload } from 'jsonwebtoken';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { CreateAuthDto } from './dto/create-auth.dto';
-//import { JwtPayload } from './dto/jwt-payload.dto'; // Import JwtPayload DTO
+import { CreateRegisterDto } from './register/dto/create-register.dto'; // ✅ correct DTO path
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    throw new Error('Method not implemented.');
-  }
-  findAll() {
-    throw new Error('Method not implemented.');
-  }
-  findOne(arg0: number) {
-    throw new Error('Method not implemented.');
-  }
-  update(arg0: number, updateAuthDto: UpdateAuthDto) {
-    throw new Error('Method not implemented.');
-  }
-  remove(arg0: number) {
-    throw new Error('Method not implemented.');
-  }
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
   ) {}
 
-    async validateUser(createLoginDto: CreateLoginDto) {
-      const { email, password } = createLoginDto;
+  // ✅ REGISTER new user
+  async create(createRegisterDto: CreateRegisterDto) {
+    const { email, password, name, county } = createRegisterDto;
 
-      // Find user by email
-      const user = await this.userModel.findOne({ email });
+    // Check if user already exists
+    const existingUser = await this.userModel.findOne({ email });
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
+    }
 
-      if (!user) {
-        throw new UnauthorizedException('Invalid email or password');
-      }
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Compare password
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+    // Create and save user
+    const newUser = new this.userModel({
+      name,
+      email,
+      password: hashedPassword,
+      county,
+    });
 
-      if (!isPasswordValid) {
-        throw new UnauthorizedException('Invalid email or password');
-      }
+    const savedUser = await newUser.save();
 
-      // Create the JWT payload
-      const payload: JwtPayload = { email: user.email, name: user.name, id: user._id?.toString() || user.id };
+    return {
+      message: 'Registration successful',
+      user: {
+        id: savedUser._id,
+        name: savedUser.name,
+        email: savedUser.email,
+        county: savedUser.county,
+      },
+    };
+  }
 
-      // Sign and return the token
-      const token = this.jwtService.sign(payload);
+  // ✅ LOGIN only existing registered users
+  async validateUser(createLoginDto: CreateLoginDto) {
+    const { email, password } = createLoginDto;
 
-      return {
-        message: 'Login successful',
-        token,
-      };
-    }}
+    // Find user by email
+    const user = await this.userModel.findOne({ email });
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    // Generate JWT token
+    const payload: JwtPayload = {
+      email: user.email,
+      name: user.name,
+      id: user._id?.toString() || user.id?.toString(),
+    };
+
+    const token = this.jwtService.sign(payload);
+
+    return {
+      message: 'Login successful',
+      token,
+    };
+  }
+  // Optional: Get all users (admin use)
+  async findAll() {
+    return await this.userModel.find().select('-password');
+  }
+
+  // Optional: Get a single user by ID
+  async findOne(id: number) {
+    const user = await this.userModel.findById(id).select('-password');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  // Optional: Update user
+  async update(id: number, updateAuthDto: UpdateAuthDto) {
+    const updated = await this.userModel.findByIdAndUpdate(id, updateAuthDto, {
+      new: true,
+    });
+    if (!updated) {
+      throw new NotFoundException('User not found');
+    }
+    return updated;
+  }
+
+  // Optional: Remove user
+  async remove(id: number) {
+    const deleted = await this.userModel.findByIdAndDelete(id);
+    if (!deleted) {
+      throw new NotFoundException('User not found');
+    }
+    return { message: 'User deleted successfully' };
+  }
+}
