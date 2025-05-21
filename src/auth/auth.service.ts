@@ -21,7 +21,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  // ✅ REGISTER new user
+  // ✅ REGISTER new user with default role = 'user'
   async create(createRegisterDto: CreateRegisterDto) {
     const { email, password, name, county } = createRegisterDto;
 
@@ -34,12 +34,13 @@ export class AuthService {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create and save user
+    // Create and save user with role defaulted to 'user'
     const newUser = new this.userModel({
       name,
       email,
       password: hashedPassword,
       county,
+      role: 'user', // default role
     });
 
     const savedUser = await newUser.save();
@@ -51,11 +52,12 @@ export class AuthService {
         name: savedUser.name,
         email: savedUser.email,
         county: savedUser.county,
+        role: savedUser.role,
       },
     };
   }
 
-  // ✅ LOGIN only existing registered users
+  // ✅ LOGIN only existing registered users, return role in token payload
   async validateUser(createLoginDto: CreateLoginDto) {
     const { email, password } = createLoginDto;
 
@@ -66,11 +68,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    // Generate JWT token
+    // Generate JWT token including role
     const payload: JwtPayload = {
       email: user.email,
       name: user.name,
       id: user._id?.toString() || user.id?.toString(),
+      role: user.role, // add role here
     };
 
     const token = this.jwtService.sign(payload);
@@ -78,8 +81,10 @@ export class AuthService {
     return {
       message: 'Login successful',
       token,
+      role: user.role, // optionally return role explicitly
     };
   }
+
   // Optional: Get all users (admin use)
   async findAll() {
     return await this.userModel.find().select('-password');
